@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Patient Dashboard</title>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    .card { background: #f0f8ff; padding: 15px; margin: 10px; border-radius: 10px; }
+    button { padding: 10px; background: #4CAF50; color: white; border: none; }
+  </style>
+</head>
+<body>
+  <h1>👨⚕️ Patient Health Entry</h1>
+  
+  <div class="card">
+    <h2>Enter Your Vitals</h2>
+    <input type="text" id="name" placeholder="Your Name"><br><br>
+    <input type="number" id="hr" placeholder="Heart Rate (BPM)"><br><br>
+    <input type="number" id="spo2" placeholder="SpO2 (%)"><br><br>
+    <input type="number" id="temp" placeholder="Temperature (°C)"><br><br>
+    <button onclick="submitData()">Submit</button>
+  </div>
+
+  <div class="card">
+    <h2>📊 Health Status</h2>
+    <p>Predicted BP: <span id="bp">--/--</span> mmHg</p>
+    <p>Risk Level: <span id="risk">--</span></p>
+  </div>
+
+  <script>
+    // Firebase Config (Replace with yours)
+    const firebaseConfig = {
+        apiKey: "AIzaSyDZy_6incPr1srlmVEgwIfd3qeuVajl8Mc",
+        authDomain: "healthmonitor-112ae.firebaseapp.com",
+        projectId: "healthmonitor-112ae",
+        storageBucket: "healthmonitor-112ae.firebasestorage.app",
+        messagingSenderId: "1083807746163",
+        appId: "1:1083807746163:web:3065ee2d00423921928206"
+      
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    // Submit Data to Firebase
+    function submitData() {
+      const name = document.getElementById("name").value;
+      const hr = parseInt(document.getElementById("hr").value);
+      const spo2 = parseInt(document.getElementById("spo2").value);
+      const temp = parseFloat(document.getElementById("temp").value);
+
+      // Predict BP & Risk (Simple Formula)
+      const systolic = Math.round(100 + (hr * 0.3)); // Example formula
+      const diastolic = Math.round(70 + (hr * 0.2));
+      const risk = (hr > 100 || spo2 < 90) ? "HIGH RISK 🚨" : "SAFE ✅";
+
+      // Update Dashboard
+      document.getElementById("bp").innerHTML = `${systolic}/${diastolic}`;
+      document.getElementById("risk").innerHTML = risk;
+
+      // Save to Firebase
+      firebase.database().ref('patients/' + name).set({
+        name: name,
+        hr: hr,
+        spo2: spo2,
+        temp: temp,
+        bp: `${systolic}/${diastolic}`,
+        risk: risk,
+        timestamp: new Date().toLocaleString()
+      });
+    }
+  </script>
+</body>
+</html>
